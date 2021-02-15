@@ -1,0 +1,9 @@
+{
+    "type": "{{ repo.type | default('s3') }}",
+    "settings": {
+        "bucket": "{{ repo.bucket }}",
+        "client": "{{ repo.client }}",
+        "max_restore_bytes_per_sec": "800mb",
+        "max_snapshot_bytes_per_sec": "800mb"
+    }
+}
