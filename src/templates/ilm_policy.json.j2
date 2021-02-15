@@ -1,0 +1,14 @@
+{
+  "name": "{{ policy.snapshot_name }}",
+  "schedule": "{{ policy.schedule }}",
+  "repository": "{{ policy.repository }}",
+  "config": {
+    "indices": {{ policy.indices }},
+    "include_global_state": false
+  },
+  "retention": {
+    "expire_after": "{{ policy.retention_expire_after | default('10d') }}",
+    "min_count": {{ policy.retention_min_count | default(4) }},
+    "max_count": {{ policy.retention_max_count | default(10) }}
+  }
+}
