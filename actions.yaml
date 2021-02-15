@@ -1,0 +1,43 @@
+connection:
+  url: http://localhost:9200
+
+index_templates:
+- name: conso
+  spec:
+    index_patterns:
+    - consolidation-*
+    - conso-*
+    template:
+      settings:
+        index:
+          similarity:
+            default:
+              type: boolean
+        refresh_interval: 30s
+        number_of_shards: 1
+
+snapshot_repositories:
+  - name: minio
+    spec:
+      type: s3
+      settings:
+        bucket: dev-steam-conso-es
+        client: default
+        max_restore_bytes_per_sec: 800mb
+        max_snapshot_bytes_per_sec: 800mb
+
+slm_policies:
+  - name: conso-daily-snap
+    spec:
+      name: "<conso-daily-snap-{now/d}>"
+      schedule: "0 30 8 * * ?"
+      repository: minio
+      config:
+        indices:
+          - "consolidation-*"
+          - ".kibana_1"
+        include_global_state: false
+      retention:
+        expire_after: 10d
+        min_count: 4
+        max_count: 10
