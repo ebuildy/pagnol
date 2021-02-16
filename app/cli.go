@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/ebuildy/elasticsearch-proviz/pkg/actions"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
@@ -16,13 +15,27 @@ type Parameters struct {
 	Actions string
 }
 
-func New() *cli.App {
+type DefinitionConnection struct {
+	URL string
+}
+
+type ActionItem struct {
+	Name, Kind string
+	Spec map[interface{}]interface{}
+}
+
+type Definition struct {
+	Connection DefinitionConnection
+	Actions    []ActionItem
+}
+
+func New(action func(p Parameters, d Definition)) *cli.App {
 
 	p := Parameters{}
 
 	return &cli.App{
-		Name: "proviz",
-		Usage: "elasticsearch provisioner",
+		Name: "pagnol",
+		Usage: "run HTTP queries and more",
 		Flags: []cli.Flag {
 			&cli.BoolFlag{
 				Name: "debug",
@@ -56,7 +69,7 @@ func New() *cli.App {
 				Destination: &p.Actions,
 			},
 		},
-		Action: func (c *cli.Context) error {
+		Action: func(context *cli.Context) error {
 			if p.Debug || p.Verbose {
 				log.SetLevel(log.DebugLevel)
 			}
@@ -69,12 +82,18 @@ func New() *cli.App {
 				log.Fatal(err)
 			}
 
+			actionsData := Definition{}
 
+			err = yaml.Unmarshal(data, &actionsData)
 
-			actions.ElasticsearchActions(actionsData.IndexTemplates)
+			if err != nil {
+				log.Fatalf("error: %v", err)
+			}
 
-				return nil
-			},
+			action(p, actionsData)
+
+			return nil
+		},
 	}
 }
 
