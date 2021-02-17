@@ -103,7 +103,15 @@ func kindToURLComponents(k string) string {
 		"index_template" : "_index_template",
 		"snapshot_repository" : "_snapshot",
 		"slm_policy" : "_slm/policy",
+		"slm-policy" : "_slm/policy",
+		"livecycle_policy" : "_ilm/policy",
+		"livecycle-policy" : "_ilm/policy",
+		"ilm" : "_ilm/policy",
 	}
 
-	return b[k]
+	if v, ok := b[k]; ok {
+		return v
+	} else {
+		return k
+	}
 }

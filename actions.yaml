@@ -11,6 +11,39 @@ actions:
   asserts:
   - status: 200
 
+- name: events
+  kind: org.elasticsearch/livecycle-policy
+  spec:
+    policy:
+      phases:
+        hot:
+          min_age: 0ms
+          actions: {}
+        warm:
+          min_age: 1d
+          actions:
+            forcemerge:
+              max_num_segments: 1
+            migrate:
+              enabled: false
+            shrink:
+              number_of_shards: 1
+            readonly: {}
+        cold:
+          min_age: 3d
+          actions:
+            set_priority:
+              priority: 0
+            migrate:
+              enabled: false
+            allocate:
+              number_of_replicas: 0
+            freeze: {}
+        delete:
+          min_age: 7d
+          actions:
+            delete: {}
+
 - name: conso
   kind: org.elasticsearch/index_template
   spec:
