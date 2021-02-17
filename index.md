@@ -1,37 +1,57 @@
-## Welcome to GitHub Pages
+**Execute a collection of HTTP queries** (like postman/newman):
+* raw HTTP queries
+* elasticsearch: to provision index templates, snapshot repositories, ILM policies
+* more is coming!
 
-You can use the [editor on GitHub](https://github.com/ebuildy/pagnol/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## usage
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```
+pagnol --debug --actions ./actions.yaml
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+## actions.yaml
 
-### Jekyll Themes
+```
+connection:
+  url: http://localhost:9200
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ebuildy/pagnol/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+actions:
 
-### Support or Contact
+- name: get cluster health
+  kind: http
+  spec:
+    method: get
+    url: /_cluster/health
+  asserts:
+  - status: 200
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+- name: conso
+  kind: org.elasticsearch/index_template
+  spec:
+    index_patterns:
+    - consolidation-*
+    - conso-*
+    template:
+      settings:
+        index:
+          similarity:
+            default:
+              type: boolean
+        refresh_interval: 30s
+        number_of_shards: 1
+```
+
+## packaging
+
+pagnol is coming as a Docker image:
+
+```
+docker run -v $(PWD)/actions.yaml:/actions.yaml ebuildy/pagnol:v0.1.0 --actions /actions.yaml
+```
+
+and as a Helm chart:
+
+```
+helm install ebuildy/pagnol 
+```
