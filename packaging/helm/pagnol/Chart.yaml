@@ -1,0 +1,6 @@
+apiVersion: v2
+name: pagnol
+description: Run HTTP queries collection as a job
+type: application
+version: 0.1.0
+appVersion: "v0.1.0"
