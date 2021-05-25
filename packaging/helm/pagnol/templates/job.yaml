@@ -39,13 +39,20 @@ spec:
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         args:
         - "--actions"
-        - "/opt/spec.yaml" 
+        - "/opt/spec.yaml"
         {{- if .Values.debug }}
         - "--debug"
         {{- end }}
         {{- if .Values.failFast }}
         - "--fail-fast"
         {{- end }}
+        securityContext:
+          capabilities:
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
         volumeMounts:
         - name: spec
           mountPath: "/opt"
