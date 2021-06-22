@@ -45,11 +45,10 @@ pod:
       cpu: "100m"
       memory: "64Mi"
 
-debug: true
-
-failFast: false
-
-spec:
+config:
+  debug: true
+  failFast: false
+  url: http://localhost:9200
   actions:
   - name: get cluster health
     kind: http
