@@ -53,6 +53,8 @@ spec:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
           runAsUser: 1000
+        env: {{ toYaml .Values.pod.extraEnvs | nindent 10 }}
+        resources: {{ toYaml .Values.pod.resources | indent 10 }}
         volumeMounts:
         - name: spec
           mountPath: "/opt"
