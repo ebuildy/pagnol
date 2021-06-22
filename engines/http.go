@@ -1,6 +1,7 @@
 package engines
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/ebuildy/pagnol/app"
 	"github.com/go-resty/resty/v2"
@@ -21,6 +22,18 @@ type ActionSpec struct {
 func HTTP(p app.Parameters) *HTTPEngine {
 	client := resty.New()
 
+	if len(p.Target.AuthUsername) > 0 {
+		client.SetBasicAuth(p.Target.AuthUsername, p.Target.AuthPassword)
+	}
+
+	if p.Target.TLSVerify == false {
+		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
+	} else {
+		if len(p.Target.TLSCertificate) > 0 {
+			client.SetRootCertificate(p.Target.TLSCertificate)
+		}
+	}
+
 	if p.Verbose {
 		client.SetDebug(true)
 	}
@@ -35,10 +48,10 @@ func (engine *HTTPEngine) Support(action app.ActionItem) bool {
 	return action.Kind == "http" || action.Kind == "https"
 }
 
-func (engine *HTTPEngine) Run(baseConnection app.DefinitionConnection, action app.ActionItem) bool {
+func (engine *HTTPEngine) Run(action app.ActionItem) bool {
 	client := engine.client
 	app := engine.cli
-	URL := baseConnection.URL
+	URL := engine.cli.Target.URL
 
 	httpSpec := ActionSpec{}
 

@@ -1,6 +1,7 @@
 package engines
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,18 @@ func Elasticsearch(p app.Parameters) *ElasticsearchEngine {
 	client := resty.New().
 		SetHeader("Content-Type", "application/json")
 
+	if len(p.Target.AuthUsername) > 0 {
+		client.SetBasicAuth(strings.Trim(p.Target.AuthUsername, " "), strings.Trim(p.Target.AuthPassword, " "))
+	}
+
+	if p.Target.TLSVerify == false {
+		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
+	} else {
+		if len(p.Target.TLSCertificate) > 0 {
+			client.SetRootCertificate(p.Target.TLSCertificate)
+		}
+	}
+
 	if p.Verbose {
 		client.SetDebug(true)
 	}
@@ -35,10 +48,10 @@ func (engine *ElasticsearchEngine) Support(action app.ActionItem) bool {
 	return strings.HasPrefix(action.Kind, "org.elasticsearch")
 }
 
-func (engine *ElasticsearchEngine) Run(baseConnection app.DefinitionConnection, action app.ActionItem) bool {
+func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 	client := engine.client
 	app := engine.cli
-	URL := baseConnection.URL
+	URL := strings.Trim(engine.cli.Target.URL, "/")
 	kind := strings.Replace(action.Kind, "org.elasticsearch/", "", 1)
 
 	URLComponent := kindToURLComponents(kind)

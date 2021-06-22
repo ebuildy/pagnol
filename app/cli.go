@@ -10,13 +10,15 @@ import (
 	"io/ioutil"
 )
 
+type TargetConnection struct {
+	AuthUsername, AuthPassword, TLSCertificate, URL string
+	TLSVerify bool
+}
+
 type Parameters struct {
 	Debug, Verbose, FailFast, DryRun bool
 	Actions string
-}
-
-type DefinitionConnection struct {
-	URL string
+	Target TargetConnection
 }
 
 type ActionItem struct {
@@ -25,7 +27,6 @@ type ActionItem struct {
 }
 
 type Definition struct {
-	Connection DefinitionConnection
 	Actions    []ActionItem
 }
 
@@ -67,6 +68,37 @@ func New(action func(p Parameters, d Definition)) *cli.App {
 				Usage: "YAML actions",
 				Required: true,
 				Destination: &p.Actions,
+			},
+			&cli.StringFlag{
+				Name: "username",
+				Required: false,
+				Destination: &p.Target.AuthUsername,
+				EnvVars: []string{"ELASTIC_USERNAME"},
+			},
+			&cli.StringFlag{
+				Name: "password",
+				Required: false,
+				Destination: &p.Target.AuthPassword,
+				EnvVars: []string{"ELASTIC_PASSWORD"},
+			},
+			&cli.StringFlag{
+				Name: "tls-cert",
+				Required: false,
+				Destination: &p.Target.TLSCertificate,
+				EnvVars: []string{"PAGNOL_TLS_CERT"},
+			},
+			&cli.StringFlag{
+				Name: "url",
+				Required: true,
+				Destination: &p.Target.URL,
+				EnvVars: []string{"PAGNOL_URL"},
+			},
+			&cli.BoolFlag{
+				Name: "tls-verify",
+				Required: false,
+				Destination: &p.Target.TLSVerify,
+				EnvVars: []string{"PAGNOL_TLS_VERIFY"},
+				DefaultText: "true",
 			},
 		},
 		Action: func(context *cli.Context) error {

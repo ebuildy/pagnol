@@ -9,7 +9,7 @@ import (
 
 type engine interface {
 	Support(action app.ActionItem) bool
-	Run(baseConnection app.DefinitionConnection, action app.ActionItem) bool
+	Run(action app.ActionItem) bool
 }
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		for _, action := range definition.Actions {
 			engine := getEngineForAction(action)
 
-			engine.Run(definition.Connection, action)
+			engine.Run(action)
 		}
 	})
 

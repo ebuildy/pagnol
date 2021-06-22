@@ -7,3 +7,5 @@ services:
     - discovery.type=single-node
     ports:
       - 9200:9200
+  pagnol:
+    build: ./packaging/docker
