@@ -9,7 +9,6 @@ metadata:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     helm.sh/hook: {{ .Values.hook.type }}
-    helm.sh/hook-weight: "-5"
     helm.sh/hook-delete-policy: {{ .Values.hook.delete_policy }}
   {{- end }}
 spec:
