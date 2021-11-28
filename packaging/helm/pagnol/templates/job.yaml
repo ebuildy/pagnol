@@ -38,7 +38,7 @@ spec:
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         args:
         - "--actions"
-        - "/opt/actions.yaml"
+        - "/opt/spec.yaml"
         - "--url"
         - {{ .Values.config.url }}
         {{- if .Values.config.debug }}
@@ -67,5 +67,5 @@ spec:
         configMap:
           name: {{ include "pagnol.fullname" . }}
           items:
-          - key: "actions.yaml"
-            path: "actions.yaml"
+          - key: "spec.yaml"
+            path: "spec.yaml"
