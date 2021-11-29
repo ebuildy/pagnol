@@ -3,6 +3,16 @@ entries:
   pagnol:
   - apiVersion: v2
     appVersion: v0.4.2
+    created: "2021-11-29T12:30:21.576123659Z"
+    description: Run HTTP queries collection as a job
+    digest: 9699e22f7449e74d83a169617e667980345e2f50635ef830fcc64c6d7a58776b
+    name: pagnol
+    type: application
+    urls:
+    - https://github.com/ebuildy/pagnol/releases/download/pagnol-0.4.4/pagnol-0.4.4.tgz
+    version: 0.4.4
+  - apiVersion: v2
+    appVersion: v0.4.2
     created: "2021-11-29T11:19:57.475144552Z"
     description: Run HTTP queries collection as a job
     digest: ab10a38ba96d98132f2b62d560e82ceb235f73f48e6bce7df218795c2c443622
@@ -71,4 +81,4 @@ entries:
     urls:
     - https://github.com/ebuildy/pagnol/releases/download/pagnol-0.1.0/pagnol-0.1.0.tgz
     version: 0.1.0
-generated: "2021-11-29T11:19:57.475184955Z"
+generated: "2021-11-29T12:30:21.57617576Z"
