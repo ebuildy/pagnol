@@ -2,5 +2,5 @@ apiVersion: v2
 name: pagnol
 description: Run HTTP queries collection as a job
 type: application
-version: 0.4.1
-appVersion: "v0.3.0"
+version: 0.4.2
+appVersion: "v0.4.0"

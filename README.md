@@ -5,7 +5,7 @@ Execute a collection of HTTP queries (like postman/newman):
 * elasticsearch: to provision index templates, snapshot repositories, ILM policies
 * more is coming!
 
-[![Helm chart](https://img.shields.io/github/v/release/ebuildy/pagnol?display_name=tag&label=Helm%20chart)]()  [![Github](https://img.shields.io/github/issues-raw/ebuildy/pagnol?style=flat-square)](https://github.com/ebuildy/pagnol/issues) [![Docker](https://img.shields.io/docker/pulls/ebuildy/pagnol?label=Docker%20pulls&style=flat-square)](https://hub.docker.com/r/ebuildy/pagnol)
+[![Helm chart](https://img.shields.io/github/v/release/ebuildy/pagnol?display_name=tag&label=Helm%20chart)]()  [![Github](https://img.shields.io/github/issues-raw/ebuildy/pagnol?style=flat-square)](https://github.com/ebuildy/pagnol/issues)
 
 ## usage
 
@@ -66,11 +66,11 @@ GLOBAL OPTIONS:
 pagnol is coming as a Docker image:
 
 ```
-docker run -v $(PWD)/actions.yaml:/actions.yaml ebuildy/pagnol:v0.3.1 --url hot-es --actions /actions.yaml
+docker run -v $(PWD)/actions.yaml:/actions.yaml ghcr.io/ebuildy/pagnol:latest --url hot-es --actions /actions.yaml
 ```
 
 and as a Helm chart:
 
 ```
-helm install ebuildy/pagnol 
+helm install ebuildy/pagnol
 ```

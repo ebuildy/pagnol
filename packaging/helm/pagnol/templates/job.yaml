@@ -44,8 +44,8 @@ spec:
         {{- if .Values.config.debug }}
         - "--debug"
         {{- end }}
-        {{- if .Values.config.failFast }}
-        - "--fail-fast"
+        {{- if .Values.config.ignoreError }}
+        - "--ignore-error"
         {{- end }}
         securityContext:
           capabilities:
