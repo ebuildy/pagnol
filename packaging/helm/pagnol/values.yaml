@@ -32,9 +32,9 @@ pod:
   annotations: {}
   labels: {}
   extraEnvs: []
-  #  - name: ELASTIC_USERNAME
+  #  - name: PAGNOL_TARGET_USERNAME
   #    value: elastic
-  #  - name: ELASTIC_PASSWORD
+  #  - name: PAGNOL_TARGET_PASSWORD
   #    value: elastic
 
   resources:

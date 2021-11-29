@@ -6,4 +6,5 @@ metadata:
     {{- include "pagnol.labels" . | nindent 4 }}
 data:
   spec.yaml: |
-    actions: {{- toYaml .Values.config.actions | default "{}" | nindent 4 }}
+    ---
+    {{- toYaml .Values.config.actions | default "{}" | nindent 4 }}
