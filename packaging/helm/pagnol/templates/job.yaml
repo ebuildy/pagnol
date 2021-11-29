@@ -23,8 +23,8 @@ spec:
     metadata:
       labels:
         {{- include "pagnol.labels" . | nindent 8 }}
-        {{- with .Values.pod.labels }}
-        {{ toYaml . | indent 8 }}
+        {{- with .Values.pod.labels -}}
+        {{ toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.pod.annotations }}
       annotations:
