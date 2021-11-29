@@ -6,7 +6,6 @@ import (
 	"github.com/ebuildy/pagnol/app"
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func HTTP(p app.Parameters) *HTTPEngine {
 		client.SetBasicAuth(p.Target.AuthUsername, p.Target.AuthPassword)
 	}
 
-	if p.Target.TLSVerify == false {
+	if p.Target.TLSNoVerify {
 		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
 	} else {
 		if len(p.Target.TLSCertificate) > 0 {
@@ -66,8 +65,10 @@ func (engine *HTTPEngine) Run(action app.ActionItem) bool {
 	}
 
 	if resp.IsError() {
-		log.Error("error [%s] %s", resp.Status(), resp.Body())
+		app.HandleError(fmt.Errorf("HTTP error [%s] %s", resp.Status(), resp.Body()))
 	}
+
+	app.HandleEnd(fmt.Sprintf("%s %s", httpSpec.Method, httpSpec.URL), action.Name, resp.IsSuccess())
 
 	return resp.IsSuccess()
 }

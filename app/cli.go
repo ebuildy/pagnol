@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/go-resty/resty/v2"
@@ -8,17 +9,19 @@ import (
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"strings"
 )
 
 type TargetConnection struct {
 	AuthUsername, AuthPassword, TLSCertificate, URL string
-	TLSVerify bool
+	TLSNoVerify                                     bool
 }
 
 type Parameters struct {
-	Debug, Verbose, FailFast, DryRun bool
-	Actions string
-	Target TargetConnection
+	Debug, Verbose, IgnoreError, DryRun bool
+	Actions                             string
+	Target                              TargetConnection
 }
 
 type ActionItem struct {
@@ -26,9 +29,7 @@ type ActionItem struct {
 	Spec map[interface{}]interface{}
 }
 
-type Definition struct {
-	Actions    []ActionItem
-}
+type Definition []ActionItem
 
 func New(action func(p Parameters, d Definition)) *cli.App {
 
@@ -47,20 +48,20 @@ func New(action func(p Parameters, d Definition)) *cli.App {
 			&cli.BoolFlag{
 				Name: "verbose",
 				Value: false,
-				Usage: "if true, log is very verbose",
+				Usage: "if set, log is very verbose",
 				Destination: &p.Verbose,
 			},
 			&cli.BoolFlag{
 				Name: "dry-run",
 				Value: false,
-				Usage: "if true, nothing is sent",
+				Usage: "if set, nothing is sent",
 				Destination: &p.DryRun,
 			},
 			&cli.BoolFlag{
-				Name: "fail-fast",
+				Name: "ignore-error",
 				Value: false,
-				Usage: "if true, stop at first error",
-				Destination: &p.FailFast,
+				Usage: "if set, no stop actions if error occured",
+				Destination: &p.IgnoreError,
 			},
 			&cli.StringFlag{
 				Name: "actions",
@@ -73,32 +74,32 @@ func New(action func(p Parameters, d Definition)) *cli.App {
 				Name: "username",
 				Required: false,
 				Destination: &p.Target.AuthUsername,
-				EnvVars: []string{"ELASTIC_USERNAME"},
+				EnvVars: []string{"PAGNOL_TARGET_USERNAME"},
 			},
 			&cli.StringFlag{
 				Name: "password",
 				Required: false,
 				Destination: &p.Target.AuthPassword,
-				EnvVars: []string{"ELASTIC_PASSWORD"},
+				EnvVars: []string{"PAGNOL_TARGET_PASSWORD"},
 			},
 			&cli.StringFlag{
-				Name: "tls-cert",
+				Name: "tls-ca",
 				Required: false,
 				Destination: &p.Target.TLSCertificate,
-				EnvVars: []string{"PAGNOL_TLS_CERT"},
+				EnvVars: []string{"PAGNOL_TARGET_TLS_CA"},
 			},
 			&cli.StringFlag{
 				Name: "url",
 				Required: true,
 				Destination: &p.Target.URL,
-				EnvVars: []string{"PAGNOL_URL"},
+				EnvVars: []string{"PAGNOL_TARGET_URL"},
 			},
 			&cli.BoolFlag{
-				Name: "tls-verify",
+				Name: "tls-no-verify",
 				Required: false,
-				Destination: &p.Target.TLSVerify,
-				EnvVars: []string{"PAGNOL_TLS_VERIFY"},
-				DefaultText: "true",
+				Destination: &p.Target.TLSNoVerify,
+				EnvVars: []string{"PAGNOL_TARGET_TLS_NO_VERIFY"},
+				DefaultText: "false",
 			},
 		},
 		Action: func(context *cli.Context) error {
@@ -106,6 +107,22 @@ func New(action func(p Parameters, d Definition)) *cli.App {
 				log.SetLevel(log.DebugLevel)
 			}
 
+			if len(p.Target.TLSCertificate) > 0 {
+				if _, err := os.Stat(p.Target.TLSCertificate); errors.Is(err, os.ErrNotExist) {
+					log.Fatal(err)
+				}
+			}
+
+			if len(p.Target.AuthUsername) > 0 {
+				p.Target.AuthUsername = strings.Trim(p.Target.AuthUsername, " ")
+			}
+
+			if len(p.Target.AuthPassword) > 0 {
+				p.Target.AuthPassword = strings.Trim(p.Target.AuthPassword, " ")
+			}
+
+			p.Target.URL = strings.Trim(p.Target.URL, "/")
+			
 			log.WithField("file", p.Actions).Debug("Loading file")
 
 			data, err :=  ioutil.ReadFile(p.Actions)
@@ -131,11 +148,11 @@ func New(action func(p Parameters, d Definition)) *cli.App {
 
 
 func (cli *Parameters) HandleError(err error) {
-	if cli.FailFast {
+	if cli.IgnoreError {
+		log.Error("error: %v", err)
+	} else {
 		log.Fatalf("error: %v", err)
 	}
-
-	log.Error("error: %v", err)
 }
 
 func (cli *Parameters) HandleSuccess(resp *resty.Response) {
@@ -148,8 +165,8 @@ func (cli *Parameters) HandleSuccess(resp *resty.Response) {
 
 func (cli *Parameters) HandleEnd(kind string, name string, success bool) {
 	if success {
-		_, _ = color.New(color.Bold, color.FgGreen).Printf("✓ %s %s created!\n", kind, name)
+		_, _ = color.New(color.Bold, color.FgGreen).Printf("✓ %s %s ok !\n", kind, name)
 	} else {
-		_, _ = color.New(color.Bold, color.FgRed).Printf("✗ %s %s not created!\n", kind, name)
+		_, _ = color.New(color.Bold, color.FgRed).Printf("✗ %s %s kaboom !\n", kind, name)
 	}
 }

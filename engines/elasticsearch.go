@@ -23,10 +23,10 @@ func Elasticsearch(p app.Parameters) *ElasticsearchEngine {
 		SetHeader("Content-Type", "application/json")
 
 	if len(p.Target.AuthUsername) > 0 {
-		client.SetBasicAuth(strings.Trim(p.Target.AuthUsername, " "), strings.Trim(p.Target.AuthPassword, " "))
+		client.SetBasicAuth(p.Target.AuthUsername, p.Target.AuthPassword)
 	}
 
-	if p.Target.TLSVerify == false {
+	if p.Target.TLSNoVerify {
 		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
 	} else {
 		if len(p.Target.TLSCertificate) > 0 {
@@ -51,7 +51,7 @@ func (engine *ElasticsearchEngine) Support(action app.ActionItem) bool {
 func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 	client := engine.client
 	app := engine.cli
-	URL := strings.Trim(engine.cli.Target.URL, "/")
+	URL := engine.cli.Target.URL
 	kind := strings.Replace(action.Kind, "org.elasticsearch/", "", 1)
 
 	URLComponent := kindToURLComponents(kind)
@@ -60,9 +60,13 @@ func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 
 	resp, err := client.R().Get(fullURL)
 
+	if err != nil {
+		app.HandleError(err)
+	}
+
 	if resp.IsSuccess() {
 		if app.Verbose {
-			log.Debug("resource found, deleting")
+			log.Debug("[elasticsearch] resource found, deleting")
 		}
 
 		resp, err = client.R().
@@ -73,7 +77,7 @@ func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 		}
 
 		if resp.IsError() {
-			log.Error("error [%s] %s", resp.Status(), resp.Body())
+			log.Error("[elasticsearch] error deleting existing resource [%s] %s", resp.Status(), resp.Body())
 		}
 	}
 

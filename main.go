@@ -28,7 +28,7 @@ func main() {
 			return nil
 		}
 
-		for _, action := range definition.Actions {
+		for _, action := range definition {
 			engine := getEngineForAction(action)
 
 			engine.Run(action)
