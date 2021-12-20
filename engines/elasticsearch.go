@@ -13,8 +13,8 @@ import (
 )
 
 type ElasticsearchEngine struct {
-	client  *resty.Client
-	cli     app.Parameters
+	client *resty.Client
+	cli    app.Parameters
 }
 
 func Elasticsearch(p app.Parameters) *ElasticsearchEngine {
@@ -27,7 +27,7 @@ func Elasticsearch(p app.Parameters) *ElasticsearchEngine {
 	}
 
 	if p.Target.TLSNoVerify {
-		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
+		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	} else {
 		if len(p.Target.TLSCertificate) > 0 {
 			client.SetRootCertificate(p.Target.TLSCertificate)
@@ -39,8 +39,8 @@ func Elasticsearch(p app.Parameters) *ElasticsearchEngine {
 	}
 
 	return &ElasticsearchEngine{
-		client:  client,
-		cli:     p,
+		client: client,
+		cli:    p,
 	}
 }
 
@@ -77,7 +77,7 @@ func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 		}
 
 		if resp.IsError() {
-			log.Error("[elasticsearch] error deleting existing resource [%s] %s", resp.Status(), resp.Body())
+			log.Errorf("[elasticsearch] error deleting existing resource [%s] %s", resp.Status(), resp.Body())
 		}
 	}
 
@@ -116,14 +116,14 @@ func (engine *ElasticsearchEngine) Run(action app.ActionItem) bool {
 }
 
 func kindToURLComponents(k string) string {
-	b := map[string]string {
-		"index_template" : "_index_template",
-		"snapshot_repository" : "_snapshot",
-		"slm_policy" : "_slm/policy",
-		"slm-policy" : "_slm/policy",
-		"livecycle_policy" : "_ilm/policy",
-		"livecycle-policy" : "_ilm/policy",
-		"ilm" : "_ilm/policy",
+	b := map[string]string{
+		"index_template":      "_index_template",
+		"snapshot_repository": "_snapshot",
+		"slm_policy":          "_slm/policy",
+		"slm-policy":          "_slm/policy",
+		"livecycle_policy":    "_ilm/policy",
+		"livecycle-policy":    "_ilm/policy",
+		"ilm":                 "_ilm/policy",
 	}
 
 	if v, ok := b[k]; ok {

@@ -10,12 +10,13 @@ import (
 )
 
 type HTTPEngine struct {
-	client  *resty.Client
-	cli     app.Parameters
+	client *resty.Client
+	cli    app.Parameters
 }
 
 type ActionSpec struct {
-	Method, URL string
+	Method, URL, ContentType string
+	Content                  interface{}
 }
 
 func HTTP(p app.Parameters) *HTTPEngine {
@@ -26,7 +27,7 @@ func HTTP(p app.Parameters) *HTTPEngine {
 	}
 
 	if p.Target.TLSNoVerify {
-		client.SetTLSClientConfig(&tls.Config{ InsecureSkipVerify: true })
+		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	} else {
 		if len(p.Target.TLSCertificate) > 0 {
 			client.SetRootCertificate(p.Target.TLSCertificate)
@@ -38,8 +39,8 @@ func HTTP(p app.Parameters) *HTTPEngine {
 	}
 
 	return &HTTPEngine{
-		client:  client,
-		cli:     p,
+		client: client,
+		cli:    p,
 	}
 }
 
@@ -58,7 +59,17 @@ func (engine *HTTPEngine) Run(action app.ActionItem) bool {
 
 	fullURL := fmt.Sprintf("%s%s", URL, httpSpec.URL)
 
-	resp, err := client.R().Execute(strings.ToUpper(httpSpec.Method), fullURL)
+	request := client.R()
+
+	if httpSpec.Content != nil {
+		request.SetBody(httpSpec.Content)
+	}
+
+	if len(httpSpec.ContentType) > 0 {
+		request.SetHeader("Content-Type", httpSpec.ContentType)
+	}
+
+	resp, err := request.Execute(strings.ToUpper(httpSpec.Method), fullURL)
 
 	if err != nil {
 		app.HandleError(err)
